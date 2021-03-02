@@ -1,0 +1,32 @@
+{
+  "test-static": {
+    "type": "static"
+  },
+  "test-dynamic": {
+    "type": "dynamic",
+    "mapSizeTiles": {
+      "width": 40,
+      "height": 40
+    },
+    "tiles": {
+      "background": {
+        "base": [
+          2
+        ]
+      },
+      "collision": {
+        "wall": {
+          "default": 2,
+          "lower-wall": 4,
+          "upper-wall": 0,
+          "wall-top-east-west": 0,
+          "wall-top-north-south": 0,
+          "wall-top-north-west": 0,
+          "wall-top-north-east": 0,
+          "wall-top-south-west": 0,
+          "wall-top-south-east": 0
+        }
+      }
+    }
+  }
+}

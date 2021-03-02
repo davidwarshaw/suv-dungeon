@@ -1,0 +1,10 @@
+{
+  "skeleton": {
+    "speed": 1,
+    "level": 1
+  },
+  "wraith": {
+    "speed": 1,
+    "level": 2
+  }
+}
