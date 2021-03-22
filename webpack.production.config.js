@@ -67,7 +67,7 @@ module.exports = {
     new CopyWebpackPlugin([{ from: "assets", to: "assets" }]),
     new ZipPlugin({
       path: "../",
-      filename: `bold-strikethrough-${PACKAGE.version}.zip`,
+      filename: `suv-dungeon-${PACKAGE.version}.zip`,
     }),
   ],
   module: {

@@ -11,20 +11,23 @@
     "tiles": {
       "background": {
         "base": [
-          2
+          3
         ]
       },
       "collision": {
         "wall": {
           "default": 2,
           "lower-wall": 4,
-          "upper-wall": 0,
+          "upper-wall": 4,
           "wall-top-east-west": 0,
           "wall-top-north-south": 0,
           "wall-top-north-west": 0,
           "wall-top-north-east": 0,
           "wall-top-south-west": 0,
-          "wall-top-south-east": 0
+          "wall-top-south-east": 0,
+          "lower-door": 12,
+          "upper-door": 8,
+          "spikes": 7
         }
       }
     }

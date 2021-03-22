@@ -13,7 +13,19 @@ function tween(scene, config) {
   });
 }
 
+function pan(camera, target, duration) {
+  return new Promise((resolve) => {
+    const resolveOnComplete = (camera, progress, scrollX, scrollY) => {
+      if (progress === 1) {
+        resolve();
+      }
+    };
+    camera.pan(target.x, target.y, duration, 'Linear', false, resolveOnComplete);
+  });  
+}
+
 export default {
   sleep,
   tween,
+  pan,
 };

@@ -1,0 +1,13 @@
+{
+  "crystal": {},
+  "wrench": {
+    "density": 0.001,
+    "health": 10
+  },
+  "cash": {
+    "density": 0.01
+  },
+  "candelabra": {
+    "density": 0.02
+  }
+}

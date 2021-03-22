@@ -1,6 +1,7 @@
 import properties from '../properties';
 
-import Font from '../ui/Font';
+import Font from "../ui/Font";
+import Menu from "../ui/Menu";
 
 export default class GameOverScene extends Phaser.Scene {
   constructor() {
@@ -14,59 +15,51 @@ export default class GameOverScene extends Phaser.Scene {
   create() {
     this.font = new Font(this);
 
-    this.messages = [
-      ['so goeth the way', 'of all flesh'],
-      ['thus passes', 'worldly glory'],
-      ['all is vanity'],
-      ['all those proud', 'shall be brought low'],
-      ['all are of dirt', 'to dirt', 'shall all return'],
-      ['a regal meal', 'for maggots', 'a fatted king maketh'],
-    ];
+    // this.playState.music = {
+    //   menu: this.sound.add("music-menu"),
+    //   flight: this.sound.add("music-flight"),
+    // };
 
-    this.images = [];
+    const { gameCrystals, cash, skulls } = this.playState;
 
-    const centerX = properties.width / 2;
-    const centerY = properties.height / 2;
+    const baseX = 150;
+    const xOffset = 20;
+    const baseY = 50;
+    const yIncrement = 30;
+    
+    let iconY = baseY;
+    this.message = this.font.render(properties.width / 2 - 34, iconY - 12, 'game over');
 
-    this.images.push(this.add.image(centerX, centerY, 'crown'));
+    iconY = baseY + yIncrement;
+    this.crystalIcon = this.add.image(baseX, iconY, 'crystal');
+    this.crystalText = this.font.render(baseX + xOffset, iconY - 2, String(gameCrystals));
+    
+    iconY = baseY + 2 * yIncrement;
+    this.cashIcon = this.add.image(baseX, iconY, 'cash');
+    this.cashText = this.font.render(baseX + xOffset, iconY - 2, String(cash));
+    
+    iconY = baseY + 3 * yIncrement;
+    this.skullIcon = this.add.image(baseX, iconY, 'skull');
+    this.skullText = this.font.render(baseX + xOffset, iconY - 2, String(skulls));
+    
+    this.menu = new Menu(
+      this,
+      [
+        {
+          text: "try again",
+          cb: () => {
+            this.scene.start("TitleScene", this.playState);
+          },
+        },
+      ],
+      properties.width / 2,
+      iconY + 32
+    );
 
-    let text = properties.rng.getItem(this.messages);
-    text.forEach((textLine, row) => {
-      let offsetX = this.offsetForText(textLine);
-      let offsetY = -32 + (16 * row);
-      this.images.push(this.font.render(centerX + offsetX, centerY + offsetY, textLine));  
-    });
-
-    this.input.keyboard.on('keydown', () => this.keyDown());
-    this.buttonIsPressed = false;
-    this.gamePadListeners = false;
-
-    this.sounds = {
-      newGame: this.sound.add('new-game'),
-    }
-  }
-
-  update() {
-    if (!this.gamePadListeners && this.input.gamepad && this.input.gamepad.pad1) {
-      this.input.gamepad.pad1.on('down', () => {
-        if (!this.buttonIsPressed) {
-          this.keyDown();
-        }
-      });
-      this.input.gamepad.pad1.on('up', () => this.buttonIsPressed = false);
-      this.gamePadListeners = true;
-    }
+    this.playState.music.menu.stop();
   }
 
   offsetForText(text) {
-    const offset = - ((text.length * 8) / 2) - 80;
-    return offset;
+    return -(text.length * 8) / 2;
   }
-
-  keyDown() {
-    this.sounds.newGame.play();
-    this.input.gamepad.removeAllListeners();
-    this.scene.start('LevelTitleScene', this.playState);
-  }
-
 }

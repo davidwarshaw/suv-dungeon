@@ -14,48 +14,36 @@ export default class LevelTitleScene extends Phaser.Scene {
   create() {
     this.font = new Font(this);
 
+    // this.playState.music = {
+    //   menu: this.sound.add("music-menu"),
+    //   flight: this.sound.add("music-flight"),
+    // };
+
     const centerX = properties.width / 2;
-    const centerY = properties.height / 2;
+    const top = 80;
 
-    this.images = [];
+    // this.art = [];
+    // this.art.push(this.add.image(centerX, 300, "art-pilot"));
+    // this.title = this.add.image(centerX, top, "title");
 
-    let offsetY = 20;
-    this.images.push(this.add.image(centerX, centerY + offsetY, 'shovel'));
+    this.menu = new Menu(
+      this,
+      [
+        {
+          text: "start",
+          cb: () => {
+            this.scene.start("GameScene", this.playState);
+          },
+        },
+      ],
+      centerX,
+      top + 80
+    );
 
-    offsetY += -32;
-    let text = `night ${this.playState.level}`;
-    let offsetX = this.offsetForText(text);
-    this.images.push(this.font.render(centerX + offsetX, centerY + offsetY, text));
-
-    this.input.keyboard.on('keydown', () => this.keyDown());
-    this.buttonIsPressed = true;
-    this.gamePadListeners = false;
-
-    this.sounds = {
-      enter: this.sound.add('enter'),
-    }
-  }
-
-  update() {
-    if (!this.gamePadListeners && this.input.gamepad && this.input.gamepad.pad1) {
-      this.input.gamepad.pad1.on('down', () => {
-        if (!this.buttonIsPressed) {
-          this.keyDown();
-        }
-      });
-      this.input.gamepad.pad1.on('up', () => this.buttonIsPressed = false);
-      this.gamePadListeners = true;
-    }
+    // this.playState.music.menu.play({ loop: true });
   }
 
   offsetForText(text) {
     return -(text.length * 8) / 2;
-  }
-
-  keyDown() {
-    this.sounds.enter.play();
-    this.input.gamepad.removeAllListeners();
-    this.scene.start('GameScene', this.playState);
-    this.scene.start('HudScene', this.playState);
   }
 }

@@ -1,61 +1,65 @@
-import properties from '../properties';
+import properties from "../properties";
 
-import Font from '../ui/Font';
+import Font from "../ui/Font";
+import Menu from "../ui/Menu";
 
 export default class TitleScene extends Phaser.Scene {
   constructor() {
-    super({ key: 'TitleScene' });
+    super({ key: "TitleScene" });
+  }
+
+  init() {
+    this.playState = {
+      level: 0,
+      cash: 0,
+      skulls: 0,
+      gameCrystals: 0,
+      health: 0,
+      speed: 0,
+      music: {},
+      sfx: {},
+    };
+
+    this.playState.sfx = {
+      horn: this.sound.add("horn"),
+      engine: this.sound.add("engine"),
+      stomp: this.sound.add("stomp"),
+      coin: this.sound.add("coin"),
+    };
+
+    this.playState.music = {
+      menu: this.sound.add("music-menu"),
+      game: this.sound.add("music-game"),
+    };
   }
 
   create() {
-    this.playState = {
-      level: 1,
-      maxLevels: 10,
-    };
-
     this.font = new Font(this);
 
     const centerX = properties.width / 2;
     const centerY = properties.height / 2;
+    const top = 80;
 
-    this.images = [];
+    this.title = this.add.image(centerX, centerY, "title-big");
 
-    this.images.push(this.add.image(centerX, centerY, 'title-big'));
+    this.menu = new Menu(
+      this,
+      [
+        {
+          text: "let's go!",
+          cb: () => {
+            this.scene.start("GameScene", this.playState);
+          },
+        },
+      ],
+      centerX,
+      top + 80
+    );
 
-    const offsetY = 70;
-    const text = 'press any key or button';
-    const offsetX = this.offsetForText(text);
-    this.images.push(this.font.render(centerX + offsetX, centerY + offsetY, text));
-
-    this.input.keyboard.on('keydown', () => this.keyDown());
-    this.buttonIsPressed = false;
-    this.gamePadListeners = false;
-    
-    this.sounds = {
-      newGame: this.sound.add('new-game'),
-    }
-  }
-
-  update() {
-    if (!this.gamePadListeners && this.input.gamepad && this.input.gamepad.pad1) {
-      this.input.gamepad.pad1.on('down', () => {
-        if (!this.buttonIsPressed) {
-          this.keyDown();
-        }
-      });
-      this.input.gamepad.pad1.on('up', () => this.buttonIsPressed = false);
-      this.gamePadListeners = true;
-    }
+    this.playState.music.menu.play({ loop: true, volume: 0.5 });
   }
 
   offsetForText(text) {
     return -(text.length * 8) / 2;
   }
-
-  keyDown() {
-    this.sounds.newGame.play();
-    this.input.gamepad.removeAllListeners();
-    this.scene.start('LevelTitleScene', this.playState);
-  }
-
 }

@@ -256,7 +256,7 @@ function rotationFromDirection(direction) {
   const directions = ['right', 'down-right', 'down', 'down-left', 'left', 'up-left', 'up', 'up-right'];
   const numerator = directions.indexOf(direction);
   const rotation = (2 * numerator / directions.length) * Math.PI;
-  console.log(`rotationFromDirection: direction: ${direction} numerator: ${numerator} rotation: ${rotation}`);
+  // console.log(`rotationFromDirection: direction: ${direction} numerator: ${numerator} rotation: ${rotation}`);
   return rotation;
 }
 

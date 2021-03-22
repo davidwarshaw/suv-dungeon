@@ -20,6 +20,10 @@ export default class Map {
 
     this.definition = mapDefinition[currentMap];
 
+    this.level = this.scene.playState.level;
+    this.width = 10 + 10 * this.level;
+    this.height = 10 + 10 * this.level;
+
     if (this.definition.type === 'static') {
       this.createStaticMap();
     }
@@ -47,7 +51,7 @@ export default class Map {
 
   createDynamicMap() {
     const { tileWidth, tileHeight } = properties;
-    const { width, height } = this.definition.mapSizeTiles;
+    const { width, height, level } = this;
     this.tilemap = this.scene.make.tilemap({ tileWidth, tileHeight, width, height });
     this.tileset = this.tilemap.addTilesetImage('tileset', 'tileset');
     this.mapLayers = {};
@@ -56,12 +60,28 @@ export default class Map {
     this.mapLayers.collision = this.tilemap.createBlankLayer('collision', this.tileset);
     this.mapLayers.foreground = this.tilemap.createBlankLayer('foreground', this.tileset);
 
-    MapGenerationSystem.populateBackground(this.definition, this.mapLayers.background);
-    MapGenerationSystem.populateCollision(this.definition, this.mapLayers.collision);
+    MapGenerationSystem.populateBackground(this.definition, this.mapLayers.background, { width, height });
+    MapGenerationSystem.populateCollision(this.definition, this.mapLayers.collision, { width, height }, level);
+  }
+
+  getPlayerSpawnXY() {
+    return {
+      x: Math.round(this.width / 2),
+      y: Math.round(this.height - 2),
+    }
+  }
+
+  getDoorXY() {
+    const lowerDoors = this.mapLayers.collision
+      .filterTiles(tile => tile.index === 12);
+    const { x, y } = lowerDoors[0];
+    return { x, y };
   }
 
   getPassableTiles() {
-    this.mapLayers.collision.filterTiles(tile => !tile);
+    return this.mapLayers.collision
+      .filterTiles(tile => tile.index === -1)
+      .map(tile => ({ x: tile.x, y: tile.y }));
   }
 
   tileIsPassable(tilePosition) {
@@ -71,6 +91,11 @@ export default class Map {
   
   tileIsViewable(tilePosition) {
     return this.tileIsPassable(tilePosition);
+  }
+
+  tileIsDoor(tilePosition) {
+    const { x, y } = this.getDoorXY();
+    return tilePosition.x === x && tilePosition.y === y;
   }
 
   setTileHighlight(tilePosition, tint) {
@@ -96,6 +121,7 @@ export default class Map {
       const tilePosition = utils.tilePositionFromKey(moveCandidate.key);
       const world = TileMath.addHalfTile(this.tilemap.tileToWorldXY(tilePosition.x, tilePosition.y));
       const image = this.scene.add.image(world.x, world.y, 'arrow');
+      image.setDepth(this.height);
       image.rotation = player.rotation + moveCandidate.rotation;
       image.alpha = 0.40;
       return image;

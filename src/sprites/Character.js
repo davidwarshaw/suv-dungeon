@@ -12,7 +12,7 @@ export default class Character extends Phaser.GameObjects.Sprite {
     
     scene.add.existing(this);
 
-    this.rotatesWhenTurning = false;
+    this.isAnimated = true;
 
     this.isAlive = true;
     this.direction = 'left';
@@ -22,6 +22,7 @@ export default class Character extends Phaser.GameObjects.Sprite {
 
     const world = TileMath.addHalfTile(map.tilemap.tileToWorldXY(tile.x, tile.y));
     this.setPosition(world.x, world.y);
+    this.setZFromY();
 
     // console.log(`${characterType}_idle_${direction}: start: ${first} end ${first}`);
     scene.anims.create({
@@ -47,10 +48,14 @@ export default class Character extends Phaser.GameObjects.Sprite {
   }
 
   playWithFlip(animationKey) {
+      if (!this.anims) {
+        return;
+      }
+      // console.log(`${this.direction} ${this.direction.indexOf('left')}`);
       // There is no 'left' animation in the spritesheet. It's just flipped 'left'.
-      if (this.direction === 'left') {
+      if (this.direction.indexOf('left') > 0) {
         this.flipX = true;
-        this.anims.play(animationKey.replace('left', 'right'));
+        this.anims.play(animationKey);
       } else {
         this.flipX = false;
         this.anims.play(animationKey);
@@ -72,6 +77,11 @@ export default class Character extends Phaser.GameObjects.Sprite {
   stopAnimation() {
     const idleAnimationKey = `${this.characterType}_idle`;
     this.playWithFlip(idleAnimationKey);
+  }
+
+  setZFromY() {
+    const { y } = this.getTilePosition();
+    this.setDepth(y);
   }
 
   getTilePosition() {

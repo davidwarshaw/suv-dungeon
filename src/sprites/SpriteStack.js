@@ -112,4 +112,11 @@ export default class SpriteStack {
   peekNextTurn() {
     return this.nextTurn;
   }
+
+  setZFromY() {
+    const { y } = this.getTilePosition();
+    this.images.forEach((image, i) => {
+      image.setDepth(y);
+    });
+  }
 }

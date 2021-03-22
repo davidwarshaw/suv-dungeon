@@ -2,14 +2,16 @@ import TileMath from './TileMath';
 const CIRCUIT_BREAKER = 500;
 
 export default class AStar {
-  constructor(map, player, enemies) {
+  constructor(map, player, enemies, clutter) {
     this.map = map;
     this.player = player;
     this.enemies = enemies;
+    this.clutter = clutter;
 
     this.defaultConfig = {
       blockedByEnemies: false,
       blockedByPlayer: false,
+      blockedByClutter: true,
     }
   }
 
@@ -21,6 +23,11 @@ export default class AStar {
 
     const enemyAtTile = this.enemies.someAtTilePosition({ x, y });
     if (config.blockedByEnemies && enemyAtTile) {
+      return;
+    }
+
+    const clutterAtTile = this.clutter.someAtTilePosition({ x, y });
+    if (config.blockedByClutter && clutterAtTile) {
       return;
     }
 

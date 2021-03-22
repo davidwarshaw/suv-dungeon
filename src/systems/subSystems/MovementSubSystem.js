@@ -3,10 +3,11 @@ import TileMath from '../../utils/TileMath';
 import utils from '../../utils/utils';
 
 export default class MovementSubSystem {
-  constructor(map, player, enemies) {
+  constructor(map, player, enemies, seal) {
     this.map = map;
     this.player = player;
     this.enemies = enemies;
+    this.seal = seal;
 
     this.aStar = new AStar(map, player, enemies);
 
@@ -16,8 +17,8 @@ export default class MovementSubSystem {
 
   tryToPathPlayer(toTile) {
     const path = this.aStar.findPath(this.player.getTilePosition(), toTile);
-    console.log('path:');
-    console.log(path);
+    // console.log('path:');
+    // console.log(path);
     if (path.length > 1) {
       this.player.setMoveQueue(path);
       return true;
@@ -26,7 +27,8 @@ export default class MovementSubSystem {
   }
 
   isPathClear(path) {
-    return path.every(tilePosition => this.map.tileIsPassable(tilePosition));
+    return path.every(tilePosition =>
+      this.map.tileIsPassable(tilePosition) || this.seal.isPassableAtTilePosition(tilePosition));
   }
 
   rotationForCandidate(side, i, newSpeed, stepIsDiagnol) {
@@ -95,20 +97,20 @@ export default class MovementSubSystem {
     const diagnolCenterLeft = this.stepLeftDiagnol(stepLeft, newSpeed);
     const diagnolCenterRight = this.stepRightDiagnol(stepRight, newSpeed);
 
-    console.log(`playerTile: ${playerTile.x}, ${playerTile.y}`);
-    console.log(`newSpeed: ${newSpeed}`);
-    console.log(`step: ${step.x}, ${step.y}`);
-    console.log(`stepLeft: ${stepLeft.x}, ${stepLeft.y}`);
-    console.log(`stepRight: ${stepRight.x}, ${stepRight.y}`);
-    console.log(`stepIsDiagnol: ${stepIsDiagnol}`);
-    console.log(`diagnolCenterLeft: ${diagnolCenterLeft.x}, ${diagnolCenterLeft.y}`);
-    console.log(`diagnolCenterRight: ${diagnolCenterRight.x}, ${diagnolCenterRight.y}`);
+    // console.log(`playerTile: ${playerTile.x}, ${playerTile.y}`);
+    // console.log(`newSpeed: ${newSpeed}`);
+    // console.log(`step: ${step.x}, ${step.y}`);
+    // console.log(`stepLeft: ${stepLeft.x}, ${stepLeft.y}`);
+    // console.log(`stepRight: ${stepRight.x}, ${stepRight.y}`);
+    // console.log(`stepIsDiagnol: ${stepIsDiagnol}`);
+    // console.log(`diagnolCenterLeft: ${diagnolCenterLeft.x}, ${diagnolCenterLeft.y}`);
+    // console.log(`diagnolCenterRight: ${diagnolCenterRight.x}, ${diagnolCenterRight.y}`);
 
     const center = {
       x: playerTile.x + (step.x * newSpeed),
       y: playerTile.y + (step.y * newSpeed),
     };
-    console.log(`center: ${center.x}, ${center.y}`);
+    // console.log(`center: ${center.x}, ${center.y}`);
     const candidates = [];
     // The left
     for (let i = 1; i <= newSpeedMagnitude; i++) {
@@ -163,8 +165,8 @@ export default class MovementSubSystem {
     const candidates = [].concat(decelCandidates, coastCandidates, accelCandidates);
 
 
-    console.log('candidates');
-    console.log(candidates);
+    // console.log('candidates');
+    // console.log(candidates);
     this.moveCandidates = {};
     // console.log(`playerTile: ${playerTile.x}, ${playerTile.y}`);
     candidates.forEach(candidate => {
@@ -176,8 +178,8 @@ export default class MovementSubSystem {
         this.moveCandidates[utils.keyFromTilePosition(toTilePosition)] = candidateWithPath;
       }
     });
-    console.log('this.moveCandidates:');
-    console.log(this.moveCandidates);
+    // console.log('this.moveCandidates:');
+    // console.log(this.moveCandidates);
   }
 
   getMoveCandidate(toTile) {

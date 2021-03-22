@@ -1,6 +1,7 @@
 import properties from '../properties';
 
-import Font from '../ui/Font';
+import Font from "../ui/Font";
+import Menu from "../ui/Menu";
 
 export default class WinScene extends Phaser.Scene {
   constructor() {
@@ -14,49 +15,51 @@ export default class WinScene extends Phaser.Scene {
   create() {
     this.font = new Font(this);
 
-    const text = ['dance, flirt, and make away', 'nights end is pale embrace', 'but not to-day'];
+    // this.playState.music = {
+    //   menu: this.sound.add("music-menu"),
+    //   flight: this.sound.add("music-flight"),
+    // };
 
-    this.images = [];
+    const { gameCrystals, cash, skulls } = this.playState;
 
-    const centerX = properties.width / 2;
-    const centerY = properties.height / 2;
+    const baseX = 150;
+    const xOffset = 20;
+    const baseY = 50;
+    const yIncrement = 30;
+    
+    let iconY = baseY;
+    this.message = this.font.render(properties.width / 2 - 30, iconY - 12, 'you win!');
 
-    this.images.push(this.add.image(centerX, centerY, 'cathedral'));
+    iconY = baseY + yIncrement;
+    this.crystalIcon = this.add.image(baseX, iconY, 'crystal');
+    this.crystalText = this.font.render(baseX + xOffset, iconY - 2, String(gameCrystals));
+    
+    iconY = baseY + 2 * yIncrement;
+    this.cashIcon = this.add.image(baseX, iconY, 'cash');
+    this.cashText = this.font.render(baseX + xOffset, iconY - 2, String(cash));
+    
+    iconY = baseY + 3 * yIncrement;
+    this.skullIcon = this.add.image(baseX, iconY, 'skull');
+    this.skullText = this.font.render(baseX + xOffset, iconY - 2, String(skulls));
+    
+    this.menu = new Menu(
+      this,
+      [
+        {
+          text: "try again",
+          cb: () => {
+            this.scene.start("TitleScene", this.playState);
+          },
+        },
+      ],
+      properties.width / 2,
+      iconY + 32
+    );
 
-    text.forEach((textLine, row) => {
-      let offsetX = this.offsetForText(textLine);
-      let offsetY = -94 + (16 * row);
-      this.images.push(this.font.render(centerX + offsetX, centerY + offsetY, textLine));  
-    });
-    this.input.keyboard.on('keydown', () => this.keyDown());
-    this.buttonIsPressed = false;
-    this.gamePadListeners = false;
-
-    this.sounds = {
-      enter: this.sound.add('enter'),
-    }
-  }
-
-  update() {
-    if (!this.gamePadListeners && this.input.gamepad && this.input.gamepad.pad1) {
-      this.input.gamepad.pad1.on('down', () => {
-        if (!this.buttonIsPressed) {
-          this.keyDown();
-        }
-      });
-      this.input.gamepad.pad1.on('up', () => this.buttonIsPressed = false);
-      this.gamePadListeners = true;
-    }
+    this.playState.music.menu.stop();
   }
 
   offsetForText(text) {
-    const offset = - ((text.length * 8) / 2);
-    return offset;
-  }
-
-  keyDown() {
-    this.sounds.enter.play();
-    this.input.gamepad.removeAllListeners();
-    this.scene.start('TitleScene', this.playState);
+    return -(text.length * 8) / 2;
   }
 }
