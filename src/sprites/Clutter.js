@@ -58,7 +58,6 @@ export default class Clutter {
   }
 
   allCrystalsHaveBeenSmashed() {
-    console.log(this.list);
     return this.getNumCrystals() === 0;
   }
 

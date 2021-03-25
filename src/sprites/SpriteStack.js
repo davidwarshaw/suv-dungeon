@@ -3,16 +3,13 @@ import properties from "../properties";
 import TileMath from '../utils/TileMath';
 
 export default class SpriteStack {
-  constructor(scene, map, tile, key) {
+  constructor(scene, x, y, key) {
     this.scene = scene;
-    this.map = map;
     this.key = key;
 
-    const world = TileMath.addHalfTile(map.tilemap.tileToWorldXY(tile.x, tile.y));
-    
     this.setters = {};
-    this.setters.x = world.x
-    this.setters.y = world.y;
+    this.setters.x = x
+    this.setters.y = y;
     this.setters.rotation = 0;
     this.setters.direction = 'right';
 
@@ -88,35 +85,5 @@ export default class SpriteStack {
 
   stopAnimation() {
     // Do nothing
-  }
-
-  getTilePosition() {
-    return this.map.tilemap.worldToTileXY(this.x, this.y);
-  }
-
-  isAtTilePosition(tilePosition) {
-    const characterTilePosition = this.getTilePosition();
-    return characterTilePosition.x === tilePosition.x && characterTilePosition.y === tilePosition.y;
-  }
-
-  setNextTurn(nextTurn) {
-    this.nextTurn = nextTurn;
-  }
-
-  popNextTurn() {
-    const nextTurn = this.nextTurn
-    this.nextTurn = null;
-    return nextTurn;
-  }
-
-  peekNextTurn() {
-    return this.nextTurn;
-  }
-
-  setZFromY() {
-    const { y } = this.getTilePosition();
-    this.images.forEach((image, i) => {
-      image.setDepth(y);
-    });
   }
 }

@@ -8,6 +8,7 @@ import GameScene from "./scenes/GameScene";
 import HudScene from "./scenes/HudScene";
 import GameOverScene from "./scenes/GameOverScene";
 import WinScene from "./scenes/WinScene";
+import CreditsScene from "./scenes/CreditsScene";
 
 const config = {
   type: Phaser.WEBGL,
@@ -28,7 +29,7 @@ const config = {
   input: {
     gamepad: true,
   },
-  scene: [BootScene, TitleScene, GameScene, HudScene, GameOverScene, WinScene],
+  scene: [BootScene, TitleScene, GameScene, HudScene, GameOverScene, WinScene, CreditsScene],
 };
 
 const game = new Phaser.Game(config); // eslint-disable-line no-unused-vars
