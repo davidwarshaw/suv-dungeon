@@ -5,7 +5,7 @@ import clutterDefinition from "../definitions/clutterDefinition.json";
 import Async from "../utils/Async";
 import TileMath from "../utils/TileMath";
 
-import RisingNumbers from '../ui/RisingNumbers';
+import RisingNumbers from "../ui/RisingNumbers";
 
 import AiSubSystem from "./subSystems/AiSubSystem";
 import AttackSubSystem from "./subSystems/AttackSubSystem";
@@ -15,8 +15,11 @@ const CHOOSE_ACTION = "CHOOSE_ACTION";
 const PLAYER_TURN = "PLAYER_TURN";
 const ENEMY_TURN = "ENEMY_TURN";
 
-const MOVE_ACTION = "MOVE"
-const MELEE_ACTION = "MELEE"
+const WAIT_ACTION = "WAIT";
+const MOVE_ACTION = "MOVE";
+const MELEE_ACTION = "MELEE";
+const MISSILE_FIRE_ACTION = "MISSILE_FIRE";
+const MISSILE_MOVE_ACTION = "MISSILE_MOVE";
 
 const MAX_DEPTH = 1000;
 
@@ -31,9 +34,9 @@ export default class GameSystem {
 
     this.state = CHOOSE_ACTION;
 
-    this.aiSubSystem = new AiSubSystem(map, player, enemies, clutter);
     this.movementSubSystem = new MovementSubSystem(map, player, enemies, seal);
     this.attackSubSystem = new AttackSubSystem(map, player, enemies);
+    this.aiSubSystem = new AiSubSystem(map, player, enemies, clutter, this.movementSubSystem);
 
     // Set the initial move candidates
     this.movementSubSystem.generatePlayerMoveCandidates();
@@ -91,13 +94,12 @@ export default class GameSystem {
   }
 
   async doRound() {
-    
     this.changeState(PLAYER_TURN);
     this.map.clearArrows();
     this.map.highlightPath(this.movementSubSystem.playerMovePath);
     await this.processPlayerAction();
     this.scene.updateHud();
-    
+
     this.changeState(ENEMY_TURN);
     this.determineEnemyActions();
     await this.processEnemyActions();
@@ -128,6 +130,12 @@ export default class GameSystem {
         this.enemyActions.push(action);
       }
     }
+    for (const projectile of this.enemies.listProjectiles) {
+      if (projectile.isAlive) {
+        const action = this.aiSubSystem.actionForProjectileMove(projectile);
+        this.enemyActions.push(action);
+      }
+    }
   }
 
   async processPlayerAction() {
@@ -139,8 +147,8 @@ export default class GameSystem {
     const shortestRotationDelta = Phaser.Math.Angle.ShortestBetween(
       this.player.rotation,
       this.player.rotation + this.playerAction.rotateTo
-      );
-    const deltaFraction =  shortestRotationDelta / nodes.length;
+    );
+    const deltaFraction = shortestRotationDelta / nodes.length;
     const duration = properties.turnDurationMillis / nodes.length;
 
     // console.log(`nodes.length: ${nodes.length}`);
@@ -156,18 +164,17 @@ export default class GameSystem {
       if (this.enemies.someAtTilePosition(to)) {
         const attackedEnemy = this.enemies.getAtTilePosition(to);
         const { damage, wasKilled } = this.attackSubSystem.resolvePlayerAttack(attackedEnemy);
-        
+
         // Damage numbers over enemies
         new RisingNumbers(this.scene, attackedEnemy, -damage, "white");
-        
+
         if (wasKilled) {
           this.scene.playState.skulls += 1;
           this.enemies.removeById(attackedEnemy.enemyId);
           this.goFlyingPromise(attackedEnemy).then(() => attackedEnemy.destroy());
-          
+
           this.scene.playState.sfx.stomp.play();
         }
-
       } else if (this.clutter.someAtTilePosition(to)) {
         const hitClutter = this.clutter.getAtTilePosition(to);
         this.clutterEffect(hitClutter);
@@ -177,13 +184,13 @@ export default class GameSystem {
           this.seal.openUp();
         }
         this.goFlyingPromise(hitClutter).then(() => hitClutter.destroy());
-      };
+      }
 
       // Check if we're going into the door
       if (this.map.tileIsDoor(to)) {
         this.scene.nextLevel();
       }
-    };
+    }
   }
 
   async processEnemyActions() {
@@ -191,16 +198,15 @@ export default class GameSystem {
     // Each enemy move takes the entire turn
     const duration = properties.turnDurationMillis;
     const animationPromises = this.enemyActions
-      .filter(action => action)
-      .map(action => this.animationPromiseFromAction(action, duration));
-    return Promise.all(animationPromises)
-      .then(() => {
-        // Show damage numbers over the player
-        if (this.totalPlayerDamage > 0) {
-          new RisingNumbers(this.scene, this.player, -this.totalPlayerDamage, "red");
-          this.totalPlayerDamage = 0;
-        }
-      });
+      .filter((action) => action)
+      .map((action) => this.animationPromiseFromAction(action, duration));
+    return Promise.all(animationPromises).then(() => {
+      // Show damage numbers over the player
+      if (this.totalPlayerDamage > 0) {
+        new RisingNumbers(this.scene, this.player, -this.totalPlayerDamage, "red");
+        this.totalPlayerDamage = 0;
+      }
+    });
   }
 
   animationPromiseFromAction(action, duration) {
@@ -212,11 +218,17 @@ export default class GameSystem {
       case MELEE_ACTION: {
         return this.characterMeleePromise(character, action.moveTo, duration);
       }
+      case MISSILE_FIRE_ACTION: {
+        return this.characterMissileFirePromise(character, duration);
+      }
+      case MISSILE_MOVE_ACTION: {
+        return this.characterMissileMovePromise(character, action.moveTo, duration);
+      }
     }
   }
 
   async characterMovePromise(character, to, rotation, duration) {
-    // console.log(`character: ${character.characterType} to: ${to.x}, ${to.y}`);
+    console.log(`character: ${character.characterType} to: ${to.x}, ${to.y}`);
 
     if (character.isAnimated) {
       character.playAnimationForMove(to);
@@ -224,7 +236,10 @@ export default class GameSystem {
 
     // Tween movement
     const toTileWorld = TileMath.addHalfTile(this.map.tilemap.tileToWorldXY(to.x, to.y));
-    const shortestRotationDelta = Phaser.Math.Angle.ShortestBetween(character.rotation, character.rotation + rotation);
+    const shortestRotationDelta = Phaser.Math.Angle.ShortestBetween(
+      character.rotation,
+      character.rotation + rotation
+    );
     const newRotation = character.rotation + shortestRotationDelta;
 
     const movePromise = Async.tween(this.scene, {
@@ -233,28 +248,25 @@ export default class GameSystem {
       y: toTileWorld.y,
       duration: duration,
     });
-    const turnPromise = !character.isAnimated ?
-      Async.tween(this.scene, {
-        targets: character,
-        rotation: newRotation,
-        duration: duration,
-      }) :
-      Promise.resolve(true);
+    const turnPromise = !character.isAnimated
+      ? Async.tween(this.scene, {
+          targets: character,
+          rotation: newRotation,
+          duration: duration,
+        })
+      : Promise.resolve(true);
 
-    return Promise
-      .all([movePromise, turnPromise])
-      .then(() => {
-        // Character could be killed at this point
-        if (character.isAnimated && character.isAlive) {
-          character.stopAnimation();
-        }
-        character.setZFromY();
-      });
+    return Promise.all([movePromise, turnPromise]).then(() => {
+      // Character could be killed at this point
+      if (character.isAnimated && character.isAlive) {
+        character.stopAnimation();
+      }
+      character.setZFromY();
+    });
   }
 
-
   async characterMeleePromise(character, to, duration) {
-    // console.log(`character: ${character.characterType} melee to: ${to}`);
+    console.log(`character: ${character.characterType} melee to: ${to}`);
 
     character.playAnimationForMove(to);
 
@@ -268,61 +280,106 @@ export default class GameSystem {
       duration: duration,
     });
 
-    return meleePromise
-      .then(() => {
-        if (character.isAnimated) {
-          character.stopAnimation();
-        }
+    return meleePromise.then(() => {
+      if (character.isAnimated) {
+        character.stopAnimation();
+      }
 
-        const { damage, wasKilled } = this.attackSubSystem.resolveEnemyAttack(character);
-        
-        // Don't show player damage until after all the animation
-        this.totalPlayerDamage += damage;
-        
-        if (wasKilled) {
-          this.scene.playerKilled();
-        }
-      });
+      const { damage, wasKilled } = this.attackSubSystem.resolveEnemyAttack(character);
+
+      // Don't show player damage until after all the animation
+      this.totalPlayerDamage += damage;
+
+      if (wasKilled) {
+        this.scene.playerKilled();
+      }
+    });
   }
 
-  async goFlyingPromise(enemy) {
-    
+  async characterMissileFirePromise(character, to, duration) {
+    console.log(`character: ${character.characterType} missile to: ${to}`);
+
+    character.playAnimationForAttack(to);
+    character.projectile.activate(character);
+
+    const missilePromise = Async.tween(this.scene, {
+      targets: character,
+      duration: duration,
+    });
+
+    return missilePromise.then(() => {
+      if (character.isAnimated) {
+        character.stopAnimation();
+      }
+    });
+  }
+
+  async characterMissileMovePromise(projectile, to, duration) {
+    console.log(`projectile: ${projectile.projectileType} missile to: ${to}`);
+
+    projectile.playAnimation();
+
+    const toTileWorld = TileMath.addHalfTile(this.map.tilemap.tileToWorldXY(to.x, to.y));
+    const missilePromise = Async.tween(this.scene, {
+      targets: projectile,
+      x: toTileWorld.x,
+      y: toTileWorld.y,
+      repeat: 0,
+      yoyo: false,
+      duration: duration,
+    });
+
+    return missilePromise.then(() => {
+      // const { damage, wasKilled } = this.attackSubSystem.resolveEnemyAttack(character);
+      // // Don't show player damage until after all the animation
+      // this.totalPlayerDamage += damage;
+      // if (wasKilled) {
+      //   this.scene.playerKilled();
+      // }
+      projectile.stopAnimation();
+      projectile.setZFromY();
+    });
+  }
+
+  async goFlyingPromise(enemy, speedOverride, rotationOverride) {
+    const speed = speedOverride || this.player.speed;
+    const direction = rotationOverride || this.player.rotation;
     // Spin from the middle
     enemy.setOrigin(0.5);
     // Set z to top
     enemy.setDepth(MAX_DEPTH);
-    
-    const playerRotationSign = this.player.speed > 0 ? 1 : -1;
-    const speedFraction = Math.abs(this.player.speed / this.player.maxSpeed);
+
+    const playerRotationSign = speed > 0 ? 1 : -1;
+    const speedFraction = Math.abs(speed / this.player.maxSpeed);
 
     const scalePromise = Async.tween(this.scene, {
       targets: enemy,
-      scale: 1 + (speedFraction * 5),
-      duration: properties.goFlyingMillis
+      scale: 1 + speedFraction * 5,
+      duration: properties.goFlyingMillis,
     });
     const rotationPromise = Async.tween(this.scene, {
       targets: enemy,
-      rotation: Math.PI * (2 + (speedFraction * 2)),
-      duration: properties.goFlyingMillis
+      rotation: Math.PI * (2 + speedFraction * 2),
+      duration: properties.goFlyingMillis,
     });
     const playerDirection = {
-      x: Math.cos(this.player.rotation),
-      y: Math.sin(this.player.rotation),
-    }
-    
+      x: Math.cos(direction),
+      y: Math.sin(direction),
+    };
+
     const directionFactor = playerRotationSign * speedFraction * 512;
-    
+
     const movePromise = Async.tween(this.scene, {
       targets: enemy,
-      x: enemy.x + (directionFactor * playerDirection.x),
-      y: enemy.y + (directionFactor * playerDirection.y),
-      duration: properties.goFlyingMillis
+      x: enemy.x + directionFactor * playerDirection.x,
+      y: enemy.y + directionFactor * playerDirection.y,
+      duration: properties.goFlyingMillis,
     });
     return Promise.all([scalePromise, rotationPromise, movePromise]);
   }
 
   clutterEffect(hitClutter) {
-    switch(hitClutter.clutterType) {
+    switch (hitClutter.clutterType) {
       case "crystal": {
         this.scene.playState.gameCrystals += 1;
         this.scene.playState.sfx.stomp.play();
@@ -345,6 +402,31 @@ export default class GameSystem {
         break;
       }
     }
+  }
+
+  bustDownDoors() {
+    const tile = this.player.getTilePosition();
+    const world = TileMath.addHalfTile(this.map.tilemap.tileToWorldXY(tile.x, tile.y));
+    const leftDoor = this.scene.add.image(world.x, world.y, "door");
+    leftDoor.setOrigin(0.5, 0.9);
+    leftDoor.setDepth(tile.y);
+
+    const rightDoor = this.scene.add.image(world.x, world.y, "door");
+    rightDoor.flipX = true;
+    rightDoor.setOrigin(0.5, 0.9);
+    rightDoor.setDepth(tile.y);
+
+    const leftSpeed = properties.rng.getNormal(3, 1);
+    const leftDirection = properties.rng.getNormal(1.5 * Math.PI, 0.2);
+    this.goFlyingPromise(leftDoor, leftSpeed, leftDirection).then(() => leftDoor.destroy());
+
+    const rightSpeed = properties.rng.getNormal(3, 1);
+    const rightDirection = properties.rng.getNormal(1.5 * Math.PI, 0.2);
+    this.goFlyingPromise(rightDoor, rightSpeed, rightDirection).then(() => rightDoor.destroy());
+
+    this.speechChangeTimer = this.scene.time.delayedCall(properties.letterRateMillis, () =>
+      this.scene.cameras.main.shake()
+    );
   }
 
   changeState(newState) {

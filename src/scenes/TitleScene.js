@@ -10,7 +10,7 @@ export default class TitleScene extends Phaser.Scene {
 
   init() {
     this.playState = {
-      level: 0,
+      level: 3,
       cash: 0,
       skulls: 0,
       gameCrystals: 0,
@@ -48,7 +48,7 @@ export default class TitleScene extends Phaser.Scene {
         {
           text: "let's go!",
           cb: () => {
-            this.scene.start("GameScene", this.playState);
+            this.scene.start("IntroScene", this.playState);
           },
         },
       ],

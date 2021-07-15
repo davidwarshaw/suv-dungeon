@@ -1,7 +1,7 @@
 {
-  "name": "bold-strikethrough",
-  "description": "Roguelike Stealth Tactics",
-  "homepage": "https://github.com/davidwarshaw/bold-strikethrough",
+  "name": "suv-dungeon",
+  "description": "Roguelike Driving Tactics",
+  "homepage": "https://github.com/davidwarshaw/suv-dungeon",
   "version": "0.1.6",
   "author": {
     "name": "never_k",
@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/davidwarshaw/bold-strikethrough.git"
+    "url": "git+https://github.com/davidwarshaw/suv-dungeon.git"
   },
   "license": "MIT",
   "keywords": [
@@ -19,7 +19,7 @@
     "itch.io"
   ],
   "bugs": {
-    "url": "https://github.com/davidwarshaw/bold-strikethrough/issues"
+    "url": "https://github.com/davidwarshaw/suv-dungeon/issues"
   },
   "main": "index.js",
   "scripts": {
@@ -50,6 +50,7 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.11.2",
+    "@koreez/phaser3-ninepatch": "^2.0.2",
     "eslint-config-standard": "^12.0.0",
     "eslint-plugin-node": "^8.0.1",
     "eslint-plugin-promise": "^4.0.1",

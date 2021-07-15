@@ -87,6 +87,16 @@ export default class MovementSubSystem {
     return this.rotateStep(step, angle * Math.PI);
   }
 
+  getMovementCenter(playerTile, acceleration) {
+    const newSpeed = this.player.speed + acceleration;
+    const step = TileMath.stepFromRotation(this.player.rotation);
+    const center = {
+      x: playerTile.x + (step.x * newSpeed),
+      y: playerTile.y + (step.y * newSpeed),
+    };
+    return center;
+  }
+
   generateCandidates(playerTile, acceleration) {
     const newSpeed = this.player.speed + acceleration;
     const newSpeedMagnitude = Math.abs(newSpeed);
@@ -106,10 +116,8 @@ export default class MovementSubSystem {
     // console.log(`diagnolCenterLeft: ${diagnolCenterLeft.x}, ${diagnolCenterLeft.y}`);
     // console.log(`diagnolCenterRight: ${diagnolCenterRight.x}, ${diagnolCenterRight.y}`);
 
-    const center = {
-      x: playerTile.x + (step.x * newSpeed),
-      y: playerTile.y + (step.y * newSpeed),
-    };
+    const center = this.getMovementCenter(playerTile, acceleration);
+
     // console.log(`center: ${center.x}, ${center.y}`);
     const candidates = [];
     // The left

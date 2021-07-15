@@ -1,21 +1,21 @@
 import properties from "../properties";
 
-import TileMath from '../utils/TileMath';
+import TileMath from "../utils/TileMath";
 
 export default class Character extends Phaser.GameObjects.Sprite {
   constructor(scene, map, tile, characterType) {
-    const spritesheet = `${characterType}`
+    const spritesheet = `${characterType}`;
     super(scene, 0, 0, spritesheet);
     this.scene = scene;
     this.map = map;
     this.characterType = characterType;
-    
+
     scene.add.existing(this);
 
     this.isAnimated = true;
 
     this.isAlive = true;
-    this.direction = 'left';
+    this.direction = "left";
 
     // Origin is more towards the bottom of the sprite
     this.setOrigin(0.5, 0.9);
@@ -34,7 +34,7 @@ export default class Character extends Phaser.GameObjects.Sprite {
     // console.log(`${characterType}_walk_${direction}: start: ${first + 1} end ${first + 3}`);
     scene.anims.create({
       key: `${characterType}_walk`,
-      frames: scene.anims.generateFrameNumbers(spritesheet, { start: 0, end: 1}),
+      frames: scene.anims.generateFrameNumbers(spritesheet, { start: 0, end: 1 }),
       frameRate: properties.animFrameRate,
       repeat: -1,
       yoyo: false,
@@ -44,22 +44,21 @@ export default class Character extends Phaser.GameObjects.Sprite {
 
     // const stopFrame = this.anims.currentAnim.frames[0];
     // this.anims.stopOnFrame(stopFrame);
-
   }
 
   playWithFlip(animationKey) {
-      if (!this.anims) {
-        return;
-      }
-      // console.log(`${this.direction} ${this.direction.indexOf('left')}`);
-      // There is no 'left' animation in the spritesheet. It's just flipped 'left'.
-      if (this.direction.indexOf('left') > 0) {
-        this.flipX = true;
-        this.anims.play(animationKey);
-      } else {
-        this.flipX = false;
-        this.anims.play(animationKey);
-      }
+    if (!this.anims) {
+      return;
+    }
+    // console.log(`${this.direction} ${this.direction.indexOf('left')}`);
+    // There is no 'left' animation in the spritesheet. It's just flipped 'left'.
+    if (this.direction.indexOf("left") > 0) {
+      this.flipX = true;
+      this.anims.play(animationKey);
+    } else {
+      this.flipX = false;
+      this.anims.play(animationKey);
+    }
   }
 
   playAnimationForMove(to) {
@@ -73,6 +72,8 @@ export default class Character extends Phaser.GameObjects.Sprite {
       this.playWithFlip(walkAnimationKey);
     }
   }
+
+  playAnimationForAttack() {}
 
   stopAnimation() {
     const idleAnimationKey = `${this.characterType}_idle`;

@@ -1,8 +1,11 @@
-import properties from '../properties';
+import properties from "../properties";
 
-import mapDefinition from '../definitions/mapDefinition';
+import enemiesDefinition from "../definitions/enemiesDefinition";
+import mapDefinition from "../definitions/mapDefinition";
+import levelDefinition from "../definitions/levelDefinition";
 
-import Enemy from '../sprites/Enemy';
+import Enemy from "../sprites/Enemy";
+import Projectile from "./Projectile";
 
 export default class Enemies {
   constructor(scene, map, player, level) {
@@ -13,10 +16,11 @@ export default class Enemies {
 
     this.mapDefinition = mapDefinition[map.currentMap];
     this.density = 0.03 * level;
-    this.enemyType = 'skeleton';
+    this.enemyType = "wizard";
 
     this.nextId = 0;
     this.list = [];
+    this.listProjectiles = [];
 
     this.populate();
   }
@@ -28,8 +32,8 @@ export default class Enemies {
     const numEnemies = Math.round(passableTiles.length * this.density);
     // console.log(`numEnemies: ${numEnemies}`);
     const enemyTiles = passableTiles
-      .filter(tile => !this.player.isAtTilePosition(tile))
-      .map(tile => ({ x: tile.x, y: tile.y, randomOrder: properties.rng.getUniform() }))
+      .filter((tile) => !this.player.isAtTilePosition(tile))
+      .map((tile) => ({ x: tile.x, y: tile.y, randomOrder: properties.rng.getUniform() }))
       .sort((l, r) => l.randomOrder - r.randomOrder)
       .slice(0, numEnemies);
 
@@ -39,13 +43,22 @@ export default class Enemies {
   }
 
   add(tile, enemyType) {
-    this.list.push(new Enemy(this.scene, this.map, tile, enemyType, this.nextId));
+    const { missile } = enemiesDefinition[enemyType];
+    const newEnemy = new Enemy(this.scene, this.map, tile, enemyType, this.nextId);
+    if (missile) {
+      newEnemy.projectile = new Projectile(this.scene, this.map, missile, newEnemy);
+    }
+    this.list.push(newEnemy);
     this.nextId++;
   }
 
   removeById(enemyId) {
-    const index = this.list.findIndex(enemy => enemy.enemyId === enemyId);
+    const index = this.list.findIndex((enemy) => enemy.enemyId === enemyId);
     this.list.splice(index, 1);
+  }
+
+  noneAtTilePosition(tilePosition) {
+    return !this.someAtTilePosition(tilePosition);
   }
 
   someAtTilePosition(tilePosition) {

@@ -1,0 +1,15 @@
+{
+  "0": {
+    "enemies": {}
+  },
+  "1": {
+    "enemies": {
+      "skeleton": 10
+    }
+  },
+  "11": {
+    "enemies": {
+      "wizard": 0.20
+    }
+  }
+}

@@ -1,76 +1,105 @@
 export default class BootScene extends Phaser.Scene {
   constructor() {
-    super({ key: 'BootScene' });
+    super({ key: "BootScene" });
   }
 
   preload() {
     // Misc
-    this.load.image('font-small', 'assets/fonts/atari_like.png');
-    this.load.image('arrow', 'assets/images/arrow.png');
+    this.load.image("font-small", "assets/fonts/atari_like.png");
+    this.load.image("arrow", "assets/images/arrow.png");
     this.load.spritesheet("large-button-frame", "assets/images/large-button-frame.png", {
       frameWidth: 160,
       frameHeight: 16,
       margin: 0,
       spacing: 0,
     });
-    this.load.image('title-big', 'assets/images/title-big.png');
-    
+    this.load.image("title-big", "assets/images/title-big.png");
+    this.load.image("splash-castle", "assets/images/splash-castle.png");
+
+    // Portraits
+    this.load.spritesheet("portrait-lich-king", "assets/images/portraits/lich-king.png", {
+      frameWidth: 32,
+      frameHeight: 32,
+      margin: 0,
+      spacing: 0,
+    });
+    this.load.spritesheet("portrait-hench-skeleton", "assets/images/portraits/hench-skeleton.png", {
+      frameWidth: 32,
+      frameHeight: 32,
+      margin: 0,
+      spacing: 0,
+    });
+
     // HUD
-    this.load.image('hud-bg', 'assets/images/hud-bg.png');
-    this.load.image('needle', 'assets/images/needle.png');
-    this.load.image('needle-small', 'assets/images/needle-small.png');
-    this.load.image('warn', 'assets/images/warn.png');
+    this.load.image("speech-nine-patch", "assets/images/speech-nine-patch.png");
+    this.load.image("hud-bg", "assets/images/hud-bg.png");
+    this.load.image("needle", "assets/images/needle.png");
+    this.load.image("needle-small", "assets/images/needle-small.png");
+    this.load.image("warn", "assets/images/warn.png");
 
     // Map
-    this.load.image('tileset', 'assets/images/maps/tileset.png');
+    this.load.image("tileset", "assets/images/maps/tileset.png");
 
     // Statics
-    this.load.image('crystal', 'assets/images/crystal.png');
-    this.load.image('wrench', 'assets/images/wrench.png');
-    this.load.image('candelabra', 'assets/images/candelabra.png');
-    this.load.image('skull', 'assets/images/skull.png');
-    this.load.image('cash', 'assets/images/cash.png');
+    this.load.image("crystal", "assets/images/crystal.png");
+    this.load.image("wrench", "assets/images/wrench.png");
+    this.load.image("candelabra", "assets/images/candelabra.png");
+    this.load.image("skull", "assets/images/skull.png");
+    this.load.image("cash", "assets/images/cash.png");
+    this.load.image("door", "assets/images/door.png");
 
     // Sprites
-    this.load.spritesheet('seal', 'assets/images/seal.png', {
+    this.load.spritesheet("seal", "assets/images/seal.png", {
       frameWidth: 24,
       frameHeight: 24,
       margin: 0,
-      spacing: 0
+      spacing: 0,
     });
-    this.load.spritesheet('enemy-skeleton', 'assets/images/enemies/skeleton_spritesheet.png', {
+    this.load.spritesheet("projectile-fireball", "assets/images/projectiles/fireball.png", {
+      frameWidth: 16,
+      frameHeight: 16,
+      margin: 0,
+      spacing: 0,
+    });
+    this.load.spritesheet("enemy-skeleton", "assets/images/enemies/skeleton_spritesheet.png", {
       frameWidth: 16,
       frameHeight: 24,
       margin: 0,
-      spacing: 0
+      spacing: 0,
     });
-    this.load.spritesheet('enemy-wraith', 'assets/images/enemies/wraith_spritesheet.png', {
+    this.load.spritesheet("enemy-wizard", "assets/images/enemies/wizard_spritesheet.png", {
       frameWidth: 16,
       frameHeight: 24,
       margin: 0,
-      spacing: 0
+      spacing: 0,
+    });
+    this.load.spritesheet("enemy-wraith", "assets/images/enemies/wraith_spritesheet.png", {
+      frameWidth: 16,
+      frameHeight: 24,
+      margin: 0,
+      spacing: 0,
     });
 
     // Sprite Stacks
-    this.load.spritesheet('sprite-stack-player', 'assets/images/player/player-alt.vox.png', {
+    this.load.spritesheet("sprite-stack-player", "assets/images/player/player-alt.vox.png", {
       frameWidth: 24,
       frameHeight: 16,
       margin: 0,
-      spacing: 0
+      spacing: 0,
     });
 
     // Audio
     this.load.audio("music-menu", "assets/audio/music-menu.mp3");
     this.load.audio("music-game", "assets/audio/music-game.mp3");
-    this.load.audio('enter', 'assets/audio/sfx_menu_select2.wav');
-    this.load.audio('walk', 'assets/audio/sfx_movement_footstepsloop4_fast.wav');
-    this.load.audio('horn', 'assets/audio/sfx-horn.mp3');
-    this.load.audio('engine', 'assets/audio/sfx-engine.mp3');
-    this.load.audio('stomp', 'assets/audio/sfx-stomp.mp3');
-    this.load.audio('coin', 'assets/audio/sfx-coin.mp3');
+    this.load.audio("enter", "assets/audio/sfx_menu_select2.wav");
+    this.load.audio("walk", "assets/audio/sfx_movement_footstepsloop4_fast.wav");
+    this.load.audio("horn", "assets/audio/sfx-horn.mp3");
+    this.load.audio("engine", "assets/audio/sfx-engine.mp3");
+    this.load.audio("stomp", "assets/audio/sfx-stomp.mp3");
+    this.load.audio("coin", "assets/audio/sfx-coin.mp3");
   }
 
   create() {
-    this.scene.start('TitleScene');
+    this.scene.start("TitleScene");
   }
 }
