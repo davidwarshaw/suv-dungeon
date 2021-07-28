@@ -87,6 +87,20 @@ export default class AiSubSystem {
     );
   }
 
+  getEnemyToPlayerRayPath(enemy) {
+    const enemyTile = enemy.getTilePosition();
+    const playerTile = this.player.getTilePosition();
+    const path = TileMath.tileRay(
+      enemyTile.x,
+      enemyTile.y,
+      playerTile.x,
+      playerTile.y,
+      this.map.width,
+      this.map.height
+    );
+    return path;
+  }
+
   getEnemyToPlayerPath(enemy) {
     const enemyTile = enemy.getTilePosition();
     const playerTile = this.player.getTilePosition();
@@ -109,7 +123,7 @@ export default class AiSubSystem {
   enemyCanMissilePlayer(enemy) {
     const path = this.getEnemyToPlayerPath(enemy);
     return (
-      !enemy.projectile.isActive &&
+      !this.enemies.enemyHasProjectile(enemy) &&
       this.pathIsPassable(path) &&
       this.pathIsFreeOfEnemies(path.slice(1)) &&
       path.length <= enemy.definition.sightRange
@@ -124,30 +138,24 @@ export default class AiSubSystem {
     };
   }
 
-  actionForMissileFire(enemy, enemyActions) {
+  actionForMissileFire(enemy) {
     // Set projectile path
-    const path = this.getEnemyToPlayerPath(enemy);
-    // We skip the first tile, which is where the enemy is now
-    enemy.projectile.path = path.slice(2);
-    const moveTo = path[1];
-    // If someone is already moving here, skip it
-    if (this.alreadyMoveToTile(moveTo, enemyActions)) {
-      return this.actionForWait(enemy);
-    }
+    const missilePath = this.getEnemyToPlayerRayPath(enemy);
+    const to = missilePath[1];
     return {
       type: MISSILE_FIRE_ACTION,
       character: enemy,
+      to,
+      missilePath,
     };
   }
 
   actionForProjectileMove(projectile) {
     const moveToNodes = projectile.popPath();
-    const path = projectile.path;
     return {
       type: MISSILE_MOVE_ACTION,
       projectile,
       moveToNodes,
-      path,
     };
   }
 
@@ -210,7 +218,7 @@ export default class AiSubSystem {
 
   determineAction(enemy, enemyActions) {
     const { behavior } = enemy.definition;
-    console.log(`determineAction: behavior: ${behavior}`);
+    // console.log(`determineAction: behavior: ${behavior}`);
     switch (behavior) {
       case "follow-for-melee":
         return this.followForMelee(enemy, enemyActions);
@@ -221,7 +229,7 @@ export default class AiSubSystem {
   }
 
   followForMelee(enemy, enemyActions) {
-    console.log("followForMelee");
+    // console.log("followForMelee");
     switch (enemy.aiMode) {
       case IDLE_MODE: {
         if (this.enemyCanSeePlayer(enemy)) {
@@ -253,7 +261,7 @@ export default class AiSubSystem {
   }
 
   avoidAndMissile(enemy, enemyActions) {
-    console.log("avoidAndMissile");
+    // console.log("avoidAndMissile");
     switch (enemy.aiMode) {
       case IDLE_MODE: {
         if (this.enemyCanSeePlayer(enemy)) {

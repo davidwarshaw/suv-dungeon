@@ -20,12 +20,28 @@ function pan(camera, target, duration) {
         resolve();
       }
     };
-    camera.pan(target.x, target.y, duration, 'Linear', false, resolveOnComplete);
-  });  
+    camera.pan(target.x, target.y, duration, "Linear", false, resolveOnComplete);
+  });
+}
+
+function sequentialize(sequence) {
+  return sequence.reduce(
+    (accumulator, current) => accumulator.then(() => current),
+    Promise.resolve()
+  );
+}
+
+function completeSpriteAnimation(sprite, animationKey) {
+  return new Promise((resolve) => {
+    sprite.play(animationKey, false);
+    sprite.once(Phaser.Animations.Events.ANIMATION_COMPLETE_KEY + animationKey, () => resolve());
+  });
 }
 
 export default {
   sleep,
   tween,
   pan,
+  sequentialize,
+  completeSpriteAnimation,
 };

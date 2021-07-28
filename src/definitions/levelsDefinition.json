@@ -1,0 +1,30 @@
+{
+  "0": {
+    "enemies": {
+      "skeleton": 1
+    }
+  },
+  "1": {
+    "enemies": {
+      "wizard": 1
+    }
+  },
+  "2": {
+    "enemies": {
+      "skeleton": 1,
+      "knight": 1,
+      "archer": 1
+    }
+  },
+  "3": {
+    "enemies": {
+      "skeleton": 1,
+      "wizard": 1
+    }
+  },
+  "4": {
+    "enemies": {
+      "skeleton": 1
+    }
+  }
+}

@@ -1,4 +1,3 @@
-
 export default class AttackSubSystem {
   constructor(map, player, enemies) {
     this.map = map;
@@ -28,7 +27,7 @@ export default class AttackSubSystem {
     // console.log(enemy);
     let wasKilled = false;
     const damage = enemy.definition.damage;
-    
+
     this.player.health = this.player.health - damage;
     if (this.player.health <= 0) {
       this.player.health = 0;

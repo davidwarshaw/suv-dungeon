@@ -19,7 +19,8 @@ export default {
   numberMillis: 2000,
   sealOpenPanMillis: 2000,
   letterRateMillis: 50,
-  speechWaitMillis: 1000,
+  sentenceRateMillis: 200,
+  speechWaitMillis: 800,
   ninePatchDimension: {
     top: 3, // Amount of pixels for top
     bottom: 3, // Amount of pixels for bottom

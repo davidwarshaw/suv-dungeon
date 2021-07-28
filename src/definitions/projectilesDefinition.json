@@ -1,6 +1,10 @@
 {
+  "arrow": {
+    "speed": 2,
+    "damage": 0
+  },
   "fireball": {
-    "speed": 3,
+    "speed": 2,
     "damage": 5
   }
 }

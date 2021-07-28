@@ -55,6 +55,12 @@ export default class BootScene extends Phaser.Scene {
       margin: 0,
       spacing: 0,
     });
+    this.load.spritesheet("projectile-arrow", "assets/images/projectiles/arrow.png", {
+      frameWidth: 16,
+      frameHeight: 16,
+      margin: 0,
+      spacing: 0,
+    });
     this.load.spritesheet("projectile-fireball", "assets/images/projectiles/fireball.png", {
       frameWidth: 16,
       frameHeight: 16,
@@ -62,6 +68,18 @@ export default class BootScene extends Phaser.Scene {
       spacing: 0,
     });
     this.load.spritesheet("enemy-skeleton", "assets/images/enemies/skeleton_spritesheet.png", {
+      frameWidth: 16,
+      frameHeight: 24,
+      margin: 0,
+      spacing: 0,
+    });
+    this.load.spritesheet("enemy-knight", "assets/images/enemies/knight_spritesheet.png", {
+      frameWidth: 16,
+      frameHeight: 24,
+      margin: 0,
+      spacing: 0,
+    });
+    this.load.spritesheet("enemy-archer", "assets/images/enemies/archer_spritesheet.png", {
       frameWidth: 16,
       frameHeight: 24,
       margin: 0,

@@ -17,10 +17,10 @@ export default class CharacterSpeech {
     this.centerX = properties.width / 2;
     this.centerY = properties.height / 2;
     const portraitGutter = 62;
-    const portraitYShift = 76;
+    const portraitYShift = 90;
     this.panelYShift = 40;
     this.panelWidth = 200;
-    this.panelHeight = 80;
+    this.panelHeight = 40;
     this.textPadding = 8;
 
     this.leftPortrait = scene.add.sprite(
@@ -60,7 +60,7 @@ export default class CharacterSpeech {
     this.speechPointer = -1;
     this.letterPointer = -1;
     this.speechChangeTimer = null;
-    this.speechIntervalId = null;
+    this.letterChangeTimer = null;
 
     this.getCurrentSpeech = this.getCurrentSpeech.bind(this);
     this.getCurrentText = this.getCurrentText.bind(this);
@@ -85,7 +85,6 @@ export default class CharacterSpeech {
   showNextLetter() {
     this.letterPointer++;
     if (this.letterPointer >= this.getCurrentSpeech().text.length) {
-      clearInterval(this.speechIntervalId);
       this.speechIntervalId = null;
 
       this.speechChangeTimer = this.scene.time.delayedCall(
@@ -97,6 +96,11 @@ export default class CharacterSpeech {
 
     const text = this.getCurrentText();
     this.text.setText(text);
+
+    const delayMillis = [".", "!", "?"].includes(text.slice(-1))
+      ? properties.sentenceRateMillis
+      : properties.letterRateMillis;
+    this.letterChangeTimer = this.scene.time.delayedCall(delayMillis, () => this.showNextLetter());
   }
 
   showNextSpeech() {
@@ -112,10 +116,14 @@ export default class CharacterSpeech {
     this.text.setText("");
 
     this.leftPortrait.visible = speech.speaker === "left";
+    this.leftPortrait.setFrame(speech.expression);
     this.rightPortrait.visible = speech.speaker !== "left";
+    this.rightPortrait.setFrame(speech.expression);
     this.speechPanel.visible = true;
 
-    this.speechIntervalId = setInterval(this.showNextLetter, properties.letterRateMillis);
+    // this.speechIntervalId = setInterval(this.showNextLetter, properties.letterRateMillis);
+
+    this.showNextLetter();
   }
 
   speechOver() {

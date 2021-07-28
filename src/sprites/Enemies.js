@@ -2,7 +2,7 @@ import properties from "../properties";
 
 import enemiesDefinition from "../definitions/enemiesDefinition";
 import mapDefinition from "../definitions/mapDefinition";
-import levelDefinition from "../definitions/levelDefinition";
+import levelsDefinition from "../definitions/levelsDefinition";
 
 import Enemy from "../sprites/Enemy";
 import Projectile from "./Projectile";
@@ -15,11 +15,13 @@ export default class Enemies {
     this.level = level;
 
     this.mapDefinition = mapDefinition[map.currentMap];
-    this.density = 0.03 * level;
-    this.enemyType = "wizard";
+    this.levelDefinition = levelsDefinition[level];
+    // this.density = 0.03 * level;
+    this.density = 0.1 * level;
 
     this.nextId = 0;
     this.list = [];
+    this.nextProjectileId = 0;
     this.listProjectiles = [];
 
     this.populate();
@@ -38,23 +40,59 @@ export default class Enemies {
       .slice(0, numEnemies);
 
     for (let enemyTile of enemyTiles) {
-      this.add(enemyTile, this.enemyType);
+      const enemyType = properties.rng.getWeightedValue(this.levelDefinition.enemies);
+      this.add(enemyTile, enemyType);
     }
   }
 
   add(tile, enemyType) {
-    const { missile } = enemiesDefinition[enemyType];
     const newEnemy = new Enemy(this.scene, this.map, tile, enemyType, this.nextId);
-    if (missile) {
-      newEnemy.projectile = new Projectile(this.scene, this.map, missile, newEnemy);
-    }
+
     this.list.push(newEnemy);
     this.nextId++;
   }
 
+  addProjectile(enemy, missilePath) {
+    const { missile } = enemy.definition;
+    if (!missile) {
+      return;
+    }
+    const newProjectile = new Projectile(
+      this.scene,
+      this.map,
+      missile,
+      missilePath,
+      enemy,
+      this.nextProjectileId
+    );
+    this.listProjectiles.push(newProjectile);
+    this.nextProjectileId++;
+
+    enemy.activeProjectile = true;
+
+    return newProjectile;
+  }
+
   removeById(enemyId) {
     const index = this.list.findIndex((enemy) => enemy.enemyId === enemyId);
+    if (index === -1) {
+      console.log(`Enemy id: ${enemyId} is already removed`);
+      return;
+    }
     this.list.splice(index, 1);
+  }
+
+  removeProjectileById(projectileId) {
+    // console.log(`Removing projectile id: ${projectileId}`);
+    const index = this.listProjectiles.findIndex(
+      (projectile) => projectile.projectileId === projectileId
+    );
+    // console.log(`projectile index: ${index}`);
+    if (index === -1) {
+      console.log(`Projectile id: ${projectileId} is already removed`);
+      return;
+    }
+    this.listProjectiles.splice(index, 1);
   }
 
   noneAtTilePosition(tilePosition) {
@@ -65,9 +103,24 @@ export default class Enemies {
     return this.list.some((enemy) => enemy.isAtTilePosition(tilePosition));
   }
 
+  noProjectileAtTilePosition(tilePosition) {
+    return !this.someProjectileAtTilePosition(tilePosition);
+  }
+
+  someProjectileAtTilePosition(tilePosition) {
+    return this.listProjectiles.some((projectile) => projectile.isAtTilePosition(tilePosition));
+  }
+
   getAtTilePosition(tilePosition) {
     const enemies = this.list.filter((enemy) => enemy.isAtTilePosition(tilePosition));
     return enemies[0];
+  }
+
+  getProjectileAtTilePosition(tilePosition) {
+    const projectiles = this.listProjectiles.filter((projectile) =>
+      projectile.isAtTilePosition(tilePosition)
+    );
+    return projectiles[0];
   }
 
   getFov() {
@@ -80,5 +133,15 @@ export default class Enemies {
 
   getTilePositions() {
     return this.list.map((enemy) => enemy.getTilePosition());
+  }
+
+  enemyHasProjectile(enemy) {
+    const ownedProjectiles = this.listProjectiles
+      .filter((projectile) => projectile.isActive)
+      .filter((projectile) => projectile.owner.id === enemy.id);
+    // console.log("enemyHasProjectile:");
+    // console.log("this.listProjectiles:");
+    // console.log(this.listProjectiles);
+    return ownedProjectiles.length > 0;
   }
 }

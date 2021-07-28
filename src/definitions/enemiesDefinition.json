@@ -1,7 +1,14 @@
 {
   "skeleton": {
     "speed": 1,
-    "level": 1,
+    "maxHealth": 10,
+    "damage": 2,
+    "sightRange": 8,
+    "behavior": "follow-for-melee",
+    "missile": null
+  },
+  "knight": {
+    "speed": 1,
     "maxHealth": 10,
     "damage": 2,
     "sightRange": 8,
@@ -10,16 +17,22 @@
   },
   "wraith": {
     "speed": 1,
-    "level": 2,
     "maxHealth": 10,
     "damage": 4,
     "sightRange": 10,
     "behavior": "follow-for-melee",
     "missile": null
   },
+  "archer": {
+    "speed": 1,
+    "maxHealth": 10,
+    "damage": 4,
+    "sightRange": 10,
+    "behavior": "avoid-and-missile",
+    "missile": "arrow"
+  },
   "wizard": {
     "speed": 1,
-    "level": 2,
     "maxHealth": 10,
     "damage": 4,
     "sightRange": 10,
