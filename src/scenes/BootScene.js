@@ -97,6 +97,12 @@ export default class BootScene extends Phaser.Scene {
       margin: 0,
       spacing: 0,
     });
+    this.load.spritesheet("enemy-snake", "assets/images/enemies/snake_spritesheet.png", {
+      frameWidth: 20,
+      frameHeight: 20,
+      margin: 0,
+      spacing: 0,
+    });
 
     // Sprite Stacks
     this.load.spritesheet("sprite-stack-player", "assets/images/player/player-alt.vox.png", {

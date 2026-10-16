@@ -379,8 +379,6 @@ export default class GameSystem {
     });
   }
 
-  async tryToMoveProjectilePromise(projectile, to) {}
-
   async checkProjectilePromise(projectile, position) {
     console.log(
       `Checking for projectile: ${projectile.projectileId} at ${position.x}, ${position.y}`
@@ -518,13 +516,19 @@ export default class GameSystem {
     rightDoor.setOrigin(0.5, 0.9);
     rightDoor.setDepth(tile.y);
 
+    const maxSpeed = 4;
+
     const leftSpeed = properties.rng.getNormal(3, 1);
     const leftDirection = properties.rng.getNormal(1.5 * Math.PI, 0.2);
-    this.goFlyingPromise(leftDoor, leftSpeed, leftDirection).then(() => leftDoor.destroy());
+    this.goFlyingPromise(leftDoor, leftSpeed, maxSpeed, leftDirection).then(() =>
+      leftDoor.destroy()
+    );
 
     const rightSpeed = properties.rng.getNormal(3, 1);
     const rightDirection = properties.rng.getNormal(1.5 * Math.PI, 0.2);
-    this.goFlyingPromise(rightDoor, rightSpeed, rightDirection).then(() => rightDoor.destroy());
+    this.goFlyingPromise(rightDoor, rightSpeed, maxSpeed, rightDirection).then(() =>
+      rightDoor.destroy()
+    );
 
     this.speechChangeTimer = this.scene.time.delayedCall(properties.letterRateMillis, () =>
       this.scene.cameras.main.shake()
